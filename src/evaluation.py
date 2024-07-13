@@ -1,0 +1,307 @@
+import torch
+import numpy as np
+from tqdm import tqdm
+
+import warnings
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
+import gymnasium as gym
+
+from stable_baselines3.common import type_aliases
+from stable_baselines3.common.vec_env import DummyVecEnv, VecEnv, VecMonitor, is_vecenv_wrapped
+import logging 
+
+class Evaluator:
+    '''
+    Abstract class for evaluating RL agents in environments
+    '''
+
+    def __init__(self, name='Evaluator'):
+        self.name = name
+        # use the class name as the logger name
+        self.logger = logging.getLogger(self.__class__.__name__)
+        # log that we created the evaluator
+        self.logger.info(f"Created evaluator {self.name}")
+
+    def __str__(self):
+        return self.name
+
+    def evaluate(self, agent, env, render=False)->np.ndarray:
+        '''
+        Evaluate the agent in the environment
+
+        Args:
+            agent (Agent): The agent to evaluate
+            env (gym.Env): The environment to evaluate the agent in
+
+        Returns:
+            rewards (np.ndarray): The rewards obtained by the agent
+        '''
+        raise NotImplementedError
+
+class EpisodicEvaluator(Evaluator):
+    '''
+    Abstract class for evaluating RL agents in environments
+    '''
+
+    def __init__(self, name='Episodic-Evaluator'):
+        super().__init__(name)
+
+    def evaluate(self, agent, env, num_episodes=100, render=False):
+        '''
+        Evaluate the agent in the environment for a number of episodes
+
+        Args:
+            agent (Agent): The agent to evaluate
+            env (gym.Env): The environment to evaluate the agent in
+            num_episodes (int, optional): The number of episodes to evaluate the agent for. Defaults to 100.
+
+        Returns:
+            rewards (np.ndarray): The rewards obtained by the agent
+        '''
+        state, _ = env.reset()
+        state = torch.tensor(state)
+        done = False
+        rewards = np.zeros(num_episodes)
+        for i in tqdm(range(num_episodes)):
+            while not done:
+                if render:
+                    env.render()
+                action = agent.step(state)
+                state, reward, done, truncated, info = env.step(action)
+                print("info: ", info)
+                state = torch.tensor(state)
+                rewards[i] = reward
+
+                # log the action, state, reward to logger.debug
+                #self.logger.info(f"Step {i}: Action: {action}, State: {state}, Reward: {reward}")
+            state, _ = env.reset()
+            state = torch.tensor(state)
+            done = False
+            
+
+        return rewards
+
+class VecEvaluator(Evaluator):
+    '''
+    Abstract class for evaluating RL agents in environments
+    '''
+
+    def __init__(self, name='VecEvaluator'):
+        super().__init__(name)
+
+    def evaluate(self, agent, env, num_episodes=100, render=False):
+        '''
+        Evaluate the agent in the environment for a number of episodes
+
+        Args:
+            agent (Agent): The agent to evaluate
+            env (gym.Env): The environment to evaluate the agent in
+            num_episodes (int, optional): The number of episodes to evaluate the agent for. Defaults to 100.
+
+        Returns:
+            rewards (np.ndarray): The rewards obtained by the agent
+        '''
+        state = env.reset()
+        state = torch.tensor(state)
+        done = False
+        rewards = np.zeros(num_episodes)
+        for i in tqdm(range(num_episodes)):
+            while not done:
+                if render:
+                    env.render()
+                action = agent.step(state)
+                #print("evaluation: ", action)
+                if np.isscalar(action):
+                    action = np.expand_dims(action, axis=0)
+                state, reward, done, infos = env.step(action)
+                done = done[0] # ONLY ONE ENV in vec env
+                state = torch.tensor(state)
+                #rewards[i] = reward[0]
+                # log the action, state, reward to logger.debug
+                #self.logger.info(f"Step {i}: Action: {action}, State: {state}, Reward: {reward}")
+            state  = env.reset()
+            state = torch.tensor(state)
+            done = False
+            info = infos[0]
+            maybe_epinfo = info.get('episode')
+            if maybe_epinfo:
+                rewards[i] = maybe_epinfo['r']
+            #print("rewards: ", rewards[i])
+
+        return rewards
+    
+class StableBaselinesEpisodicEvaluator(Evaluator):
+
+    def __init__(self, name='Stable-Baselines-Episodic-Evaluator'):
+        super().__init__(name)
+
+    def evaluate(self, agent, env, num_episodes=100, render=False):
+        '''
+        Evaluate the agent in the environment for a number of episodes
+
+        Args:
+            agent (Agent): The agent to evaluate
+            env (gym.Env): The environment to evaluate the agent in
+            num_episodes (int, optional): The number of episodes to evaluate the agent for. Defaults to 100.
+
+        Returns:
+            rewards (np.ndarray): The rewards obtained by the agent
+        '''
+        rewards = self._evaluate_policy(model=agent, env=env, n_eval_episodes=num_episodes, deterministic=False)
+        return np.array(rewards)
+    def _evaluate_policy(
+            self,
+            model: "type_aliases.PolicyPredictor",
+            env: Union[gym.Env, VecEnv],
+            n_eval_episodes: int = 10,
+            deterministic: bool = True,
+            render: bool = False,
+            callback: Optional[Callable[[Dict[str, Any], Dict[str, Any]], None]] = None,
+            reward_threshold: Optional[float] = None,
+            return_episode_rewards: bool = False,
+            warn: bool = True,
+    ) -> Union[Tuple[float, float], Tuple[List[float], List[int]]]:
+        """
+        Runs policy for ``n_eval_episodes`` episodes and returns average reward.
+        If a vector env is passed in, this divides the episodes to evaluate onto the
+        different elements of the vector env. This static division of work is done to
+        remove bias. See https://github.com/DLR-RM/stable-baselines3/issues/402 for more
+        details and discussion.
+
+        .. note::
+            If environment has not been wrapped with ``Monitor`` wrapper, reward and
+            episode lengths are counted as it appears with ``env.step`` calls. If
+            the environment contains wrappers that modify rewards or episode lengths
+            (e.g. reward scaling, early episode reset), these will affect the evaluation
+            results as well. You can avoid this by wrapping environment with ``Monitor``
+            wrapper before anything else.
+
+        :param model: The RL agent you want to evaluate. This can be any object
+            that implements a `predict` method, such as an RL algorithm (``BaseAlgorithm``)
+            or policy (``BasePolicy``).
+        :param env: The gym environment or ``VecEnv`` environment.
+        :param n_eval_episodes: Number of episode to evaluate the agent
+        :param deterministic: Whether to use deterministic or stochastic actions
+        :param render: Whether to render the environment or not
+        :param callback: callback function to do additional checks,
+            called after each step. Gets locals() and globals() passed as parameters.
+        :param reward_threshold: Minimum expected reward per episode,
+            this will raise an error if the performance is not met
+        :param return_episode_rewards: If True, a list of rewards and episode lengths
+            per episode will be returned instead of the mean.
+        :param warn: If True (default), warns user about lack of a Monitor wrapper in the
+            evaluation environment.
+        :return: Mean reward per episode, std of reward per episode.
+            Returns ([float], [int]) when ``return_episode_rewards`` is True, first
+            list containing per-episode rewards and second containing per-episode lengths
+            (in number of steps).
+        """
+        is_monitor_wrapped = False
+        # Avoid circular import
+        from stable_baselines3.common.monitor import Monitor
+
+        if not isinstance(env, VecEnv):
+            env = DummyVecEnv([lambda: env])  # type: ignore[list-item, return-value]
+
+        is_monitor_wrapped = is_vecenv_wrapped(env, VecMonitor) or env.env_is_wrapped(Monitor)[0]
+
+        if not is_monitor_wrapped and warn:
+            warnings.warn(
+                "Evaluation environment is not wrapped with a ``Monitor`` wrapper. "
+                "This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. "
+                "Consider wrapping environment first with ``Monitor`` wrapper.",
+                UserWarning,
+            )
+
+        n_envs = env.num_envs
+        episode_rewards = []
+        episode_lengths = []
+
+        episode_counts = np.zeros(n_envs, dtype="int")
+        # Divides episodes among different sub environments in the vector as evenly as possible
+        episode_count_targets = np.array([(n_eval_episodes + i) // n_envs for i in range(n_envs)], dtype="int")
+
+        current_rewards = np.zeros(n_envs)
+        current_lengths = np.zeros(n_envs, dtype="int")
+        observations = env.reset()
+        states = None
+        episode_starts = np.ones((env.num_envs,), dtype=bool)
+        while (episode_counts < episode_count_targets).any():
+            actions, states = model.predict(
+                observations,  # type: ignore[arg-type]
+                state=states,
+                episode_start=episode_starts,
+                deterministic=deterministic,
+            )
+            new_observations, rewards, dones, infos = env.step(actions)
+            current_rewards += rewards
+            current_lengths += 1
+            for i in range(n_envs):
+                if episode_counts[i] < episode_count_targets[i]:
+                    # unpack values so that the callback can access the local variables
+                    reward = rewards[i]
+                    done = dones[i]
+                    info = infos[i]
+                    episode_starts[i] = done
+
+                    if callback is not None:
+                        callback(locals(), globals())
+
+                    if dones[i]:
+                        if is_monitor_wrapped:
+                            # Atari wrapper can send a "done" signal when
+                            # the agent loses a life, but it does not correspond
+                            # to the true end of episode
+                            if "episode" in info.keys():
+                                # Do not trust "done" with episode endings.
+                                # Monitor wrapper includes "episode" key in info if environment
+                                # has been wrapped with it. Use those rewards instead.
+                                episode_rewards.append(info["episode"]["r"])
+                                episode_lengths.append(info["episode"]["l"])
+                                # Only increment at the real end of an episode
+                                episode_counts[i] += 1
+                        else:
+                            episode_rewards.append(current_rewards[i])
+                            episode_lengths.append(current_lengths[i])
+                            episode_counts[i] += 1
+                        current_rewards[i] = 0
+                        current_lengths[i] = 0
+
+            observations = new_observations
+
+            if render:
+                env.render()
+
+        return episode_rewards
+    
+class StepwiseEvaluator(Evaluator):
+    '''
+    Evaluates the agent stepwise
+    '''
+
+    def __init__(self, name='Stepwise-Evaluator'):
+        super().__init__(name)
+
+    def evaluate(self, agent, env, num_steps=10000, render=False):
+        '''
+        Evaluate the agent in the environment for a number of steps
+        '''
+        state, _ = env.reset()
+        state = torch.tensor(state)
+        done = False
+        rewards = np.zeros(num_steps)
+        for i in tqdm(range(num_steps)):
+            if render:
+                env.render()
+            action = agent.step(state)
+            state, reward, done, _, _ = env.step(action)
+            state = torch.tensor(state)
+            rewards[i] = reward
+            if done:
+                state, _ = env.reset()
+                state = torch.tensor(state)
+                done = False
+        
+        return rewards
+
