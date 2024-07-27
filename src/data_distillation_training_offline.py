@@ -405,15 +405,10 @@ def train_data_episodic_offline(student: Student, teacher: Teacher, env: gymnasi
             real_teacher_knowledge = teacher.get_knowledge_distill_train(states_batch)
             real_loss = loss_function.loss(real_teacher_knowledge.to(device), actions_batch)
             syn_teacher_knowledge = teacher.get_knowledge_distill_train(synthetic_data[0][start_idx:start_idx+bucket_size])
-            #print(syn_student_knowledge.grad)
             syn_loss = loss_function.loss(syn_teacher_knowledge.to(device), teacher_knowledge_param[start_idx:start_idx+bucket_size])
+            # Perform Gradient Matching
             gw_real = torch.autograd.grad(real_loss, teacher_params, allow_unused=True)
             gw_real = list((_.detach().clone() if _ is not None else None for _ in gw_real))
-            #gw_real = list((_.detach().clone() for _ in gw_real))
-
-            #print(syn_outer_batch)           
-            #syn_student_knowledge = student.get_knowledge(syn_outer_batch[0][0])
-            #syn_loss = loss_function.loss(syn_student_knowledge, syn_outer_batch[0][1])
 
             gw_syn = torch.autograd.grad(syn_loss, teacher_params, create_graph=True, allow_unused=True)
             #print(states_syn)
