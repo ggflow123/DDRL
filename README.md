@@ -15,6 +15,10 @@ The jobs are organized by Hydra, please refer to [Hydra](https://hydra.cc/docs/i
 
 # Data Distillation steps
 
+### Teacher Models
+
+Please refer to the **models** directory in this repo.
+
 ### Environments:
 
 We use three environments in Procgen benchmark: bigfish, starpilot and jumper, all in the easy mode with 200 seeds.
