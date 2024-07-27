@@ -1,0 +1,19 @@
+# config.yaml
+results_dir: results # Path to save results
+data_dir: data # Path to save data
+model_dir: models # Path to save models
+log_dir: logs # Path to save logs
+student_save_path: null
+student_train_epochs: 10
+student_update_freq: 16
+
+defaults:
+  - _self_
+  - env: heist0
+  - student: policy_student
+  - distill: exp1
+  - loss: MAE
+  - optimizer: adam0
+  - buffer: batch_buffer100
+  - trainablebuffer: batch_trainablebuffer
+  

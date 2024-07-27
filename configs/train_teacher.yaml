@@ -1,0 +1,13 @@
+# train_teacher.yaml
+total_timesteps: 200000000
+eval_freq: 100000
+save_freq: 100000
+features_extractor: default
+policy_net: MlpPolicy
+ckpts_dir: checkpoints # Path to save checkpoints
+plot_dir: plot # Path to save reward plot
+model_dir: model # Path to save models
+resume_path: null
+defaults:
+  - _self_
+  - env: heist1

@@ -1,0 +1,8 @@
+model_class: base_models.CNN
+model_kwargs:
+  kernel_size: 3
+  lps: 2
+  channel_multiplier: 4
+  activation: torch.nn.ReLU
+  pool: torch.nn.AvgPool2d
+save_name: CNN0

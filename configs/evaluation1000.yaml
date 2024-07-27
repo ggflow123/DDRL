@@ -1,0 +1,14 @@
+results_dir: results # Path to save results
+data_dir: data # Path to save data
+model_dir: models # Path to save models
+log_dir: logs # Path to save logs
+
+evaluator_class: evaluation.EpisodicEvaluator
+model_class: students.PolicyStudent
+model_save_path: student-model__heist1__ppo_heist_model_800000_steps__policy-student__mlp0__MAE__adam0__exp1.pt
+num_episodes: 1000
+
+save_name: evaluation1000
+
+defaults:
+  - env: heist0

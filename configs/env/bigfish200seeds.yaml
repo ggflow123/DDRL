@@ -1,0 +1,6 @@
+env_name: bigfish
+save_name: bigfish200seeds
+num_levels: 200
+start_level: 100
+num_steps: 256
+distribution_mode: easy

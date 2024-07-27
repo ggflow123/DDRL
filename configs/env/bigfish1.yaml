@@ -1,0 +1,6 @@
+env_name: procgen-bigfish-v0
+save_name: bigfish1
+num_levels: 1
+start_level: 1
+num_steps: 256
+distribution_mode: easy

@@ -1,0 +1,4 @@
+buffer_class: buffer.RolloutBuffer
+save_name: buffer100
+buffer_kwargs:
+  buffer_size: 100

@@ -1,0 +1,2 @@
+loss_class: loss_functions.MeanAbsoluteError
+save_name: MAE

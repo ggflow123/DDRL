@@ -1,0 +1,6 @@
+env_name: starpilot
+save_name: starpilotinf
+num_levels: 0
+start_level: 0
+num_steps: 256
+distribution_mode: easy

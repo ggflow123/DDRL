@@ -1,0 +1,7 @@
+teacher_path: ppo_heist_model_800000_steps
+teacher_class: teacher.PPOTeacherHeist
+save_name: exp10b
+distill_kwargs:
+  num_episodes: 1000
+  online_network: teacher
+  batch_size: 16

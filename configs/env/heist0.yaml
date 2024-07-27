@@ -1,0 +1,6 @@
+env_name: procgen-heist-v0
+save_name: heist0
+num_levels: 1
+start_level: 0
+num_steps: 256
+distribution_mode: easy

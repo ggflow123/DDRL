@@ -1,0 +1,5 @@
+student_class: students.PolicyStudent
+save_name: policy-student
+
+defaults:
+  - base_model: mlp0

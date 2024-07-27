@@ -1,0 +1,6 @@
+env_name: starpilot
+save_name: starpilot200seeds
+num_levels: 200
+start_level: 100
+num_steps: 256
+distribution_mode: easy

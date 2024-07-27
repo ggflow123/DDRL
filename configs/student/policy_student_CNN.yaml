@@ -1,0 +1,5 @@
+student_class: students.PolicyStudent
+save_name: policy-student-CNN
+
+defaults:
+  - base_model: CNN0

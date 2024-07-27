@@ -1,0 +1,7 @@
+model_class: base_models.MLP
+model_kwargs:
+  hidden_size: 128
+  num_layers: 10
+  activation: torch.nn.ReLU
+  dropout: 0.0
+save_name: mlp0

@@ -1,0 +1,6 @@
+env_name: bigfish
+save_name: bigfishinf
+num_levels: 0
+start_level: 0
+num_steps: 256
+distribution_mode: easy

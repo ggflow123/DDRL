@@ -1,0 +1,4 @@
+buffer_class: buffer.RolloutBufferBatch
+save_name: batch_buffer100
+buffer_kwargs:
+  buffer_size: 100

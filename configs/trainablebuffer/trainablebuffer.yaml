@@ -1,0 +1,6 @@
+buffer_class: buffer.TrainableSyntheticBuffer
+save_name: trainablebuffer100
+buffer_kwargs:
+  #buffer_size: float('inf')
+  synthetic_buffer_size: 100 
+  synthetic_init_threshold_size: 1000

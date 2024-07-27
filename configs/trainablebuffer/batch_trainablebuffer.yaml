@@ -1,0 +1,5 @@
+buffer_class: buffer.TrainableSyntheticBufferBatch
+save_name: batch_trainablebuffer100
+buffer_kwargs:
+  synthetic_buffer_size: 15 
+  synthetic_init_threshold_size: 1000

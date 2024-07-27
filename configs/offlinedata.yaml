@@ -1,0 +1,14 @@
+results_dir: results # Path to save results
+data_dir: data # Path to save data
+model_dir: models # Path to save models
+log_dir: logs # Path to save logs
+
+evaluator_class: evaluation.VecEvaluator
+model_class: teacher.PPOTeacherProcgen
+model_save_path: bf200seeds.pt
+num_episodes: 100
+
+save_name: evaluation1000
+data_size: 150
+defaults:
+  - env: bigfish200seeds

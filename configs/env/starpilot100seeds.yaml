@@ -1,0 +1,6 @@
+env_name: procgen-starpilot-v0
+save_name: starpilot100seeds
+num_levels: 100
+start_level: 0
+num_steps: 256
+distribution_mode: easy
