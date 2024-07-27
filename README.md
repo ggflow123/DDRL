@@ -1,6 +1,6 @@
 # DDRL
 
-Repository for Data Distillation for Offline Reinforcement Learning. Feel free to check our[ website](https://datasetdistillation4rl.github.io) and [paper](https://openreview.net/forum?id=pnhiwoXZeY#).
+Repository for Data Distillation for Offline Reinforcement Learning. Feel free to check our[ website](https://datasetdistillation4rl.github.io) and [paper](https://openreview.net/forum?id=yf11dMbvMV).
 
 ## Environment Setup
 
