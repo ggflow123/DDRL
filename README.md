@@ -1,6 +1,6 @@
 # DDRL
 
-Repository for Data Distillation for Offline Reinforcement Learning. Feel free to check our[ website](https://datasetdistillation4rl.github.io) and [paper](https://openreview.net/forum?id=yf11dMbvMV).
+Repository for Data Distillation for Offline Reinforcement Learning. Feel free to check our[ website](https://datasetdistillation4rl.github.io) and [paper](https://arxiv.org/abs/2407.20299).
 
 ## Environment Setup
 
@@ -82,4 +82,20 @@ Put the trained student in the **models** folder, and run under the main repo:
 python src/run_evaluation.py \
 model_save_path=student-model__offline__starpilot200seeds__sp200seeds.pt__policy-student-CNN__CNN0__MAE__adam0__batch_buffer100__batch_trainablebuffer100__exp100.pt \
 env=starpilot200seeds evaluator_class=evaluation.VecEvaluator
+```
+
+# Citation
+
+Thank you for your citation!
+
+```
+@misc{light2024datasetdistillationofflinereinforcement,
+      title={Dataset Distillation for Offline Reinforcement Learning}, 
+      author={Jonathan Light and Yuanzhe Liu and Ziniu Hu},
+      year={2024},
+      eprint={2407.20299},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2407.20299}, 
+}
 ```
